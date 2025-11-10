@@ -1,6 +1,12 @@
 import Client from './Client';
 
-export default async function Page({ params }: any) {
-  const { id } = await params; // works if params is a plain object or a Promise
+type Params = { id: string };
+
+export default async function Page({
+  params,
+}: {
+  params: Promise<Params>;
+}) {
+  const { id } = await params;
   return <Client id={id} />;
 }

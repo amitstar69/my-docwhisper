@@ -1,6 +1,7 @@
 {
   "name": "my-docwhisper",
   "version": "1.0.0",
+  packageManager": "npm@10.2.3
   "private": true,
   "scripts": {
     "dev": "next dev",

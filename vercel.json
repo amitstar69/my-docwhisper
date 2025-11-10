@@ -1,12 +1,5 @@
 {
-  "version": 2,
   "builds": [
-    { "src": "app/**", "use": "@vercel/next" },
-    { "src": "supabase/functions/**", "use": "@vercel/supabase" }
-  ],
-  "functions": {
-    "supabase/functions/**/*.ts": {
-      "runtime": "nodejs18.x"
-    }
-  }
+    { "src": "app/**", "use": "@vercel/next" }
+  ]
 }

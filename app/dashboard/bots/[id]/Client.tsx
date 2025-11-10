@@ -3,16 +3,15 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-type Msg = { user: string; ai: string; citations: any[] };
-type Props = { id: string };
-
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export default function BotChatClient({ id }: Props) {
-  const [messages, setMessages] = useState<Msg[]>([]);
+export default function BotChatClient({ id }: { id: string }) {
+  const [messages, setMessages] = useState<
+    { user: string; ai: string; citations: any[] }[]
+  >([]);
   const [input, setInput] = useState('');
   const [storeName, setStoreName] = useState('');
 
@@ -30,10 +29,8 @@ export default function BotChatClient({ id }: Props) {
 
   const sendQuery = async () => {
     if (!input || !storeName) return;
-
-    const {
-      data: { session } = { session: null },
-    } = await supabase.auth.getSession();
+    const { data: { session } = { session: null } } =
+      await supabase.auth.getSession();
     if (!session) return;
 
     const res = await fetch(
@@ -44,7 +41,7 @@ export default function BotChatClient({ id }: Props) {
           Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query: input, storeName, metadataFilter: '' }),
+        body: JSON.stringify({ query: input, storeName }),
       }
     );
 
@@ -74,8 +71,7 @@ export default function BotChatClient({ id }: Props) {
           </div>
         ))}
       </div>
-
-      <div className="flex space-x-2">
+      <div className="flex space-x-2 mt-2">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}

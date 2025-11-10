@@ -1,5 +1,1 @@
-{
-  "builds": [
-    { "src": "app/**", "use": "@vercel/next" }
-  ]
-}
+

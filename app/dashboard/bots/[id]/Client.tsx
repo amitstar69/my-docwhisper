@@ -26,19 +26,18 @@ export default function BotChatClient({ id }: Props) {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
-    const res = await fetch(${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/query-bot, {
-      method: 'POST',
-      headers: {
-        'Authorization': Bearer ${session.access_token},
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ query: input, storeName, metadataFilter: '' })
-    });
-    const data = await res.json();
-    setMessages(prev => [...prev, { user: input, ai: data.text, citations: data.citations }]);
-    setInput('');
-  };
-
+   const res = await fetch(
+  `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/query-bot`,
+  {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query: input, storeName, metadataFilter: '' }),
+  }
+);
+    
   return (
     <div className="flex flex-col h-screen p-4">
       <div className="flex-1 overflow-y-auto space-y-4">

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useMemo, useState } from 'react';
 
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB upload cap for Gemini ingest
-const SUCCESS_MESSAGE = "Bot created successfully!";
+const SUCCESS_MESSAGE = 'Bot created successfully!';
 const templates = [
   {
     value: 'default',
@@ -103,8 +103,7 @@ export default function NewBot() {
       setPhase('indexing');
       setMessage('Indexing with Gemini File Search…');
 
-      const { storeName } = await response.json();
-      console.debug('Indexed Gemini store', storeName);
+      await response.json();
 
       setPhase('success');
       setMessage(SUCCESS_MESSAGE);

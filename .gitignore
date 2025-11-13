@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Build output
+.next/
+out/
+dist/
+.next/cache/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Env & config
+.env*
+!.env.example
+.vercel/
+
+# Supabase artifacts
+supabase/.temp/
+
+# Misc
+.DS_Store

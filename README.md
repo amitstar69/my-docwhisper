@@ -1,4 +1,4 @@
-# my-docwhisper# DocWhisper
+# DocWhisper
 
 A no-code RAG app for chatting with documents using Gemini File Search + Supabase.
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useMemo, useState } from 'react';
 
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB upload cap for Gemini ingest
-const SUCCESS_MESSAGE = 'Bot created successfully!';
+const BOT_SUCCESS_MESSAGE = 'Bot created successfully!';
 const templates = [
   {
     value: 'default',
@@ -106,7 +106,7 @@ export default function NewBot() {
       await response.json();
 
       setPhase('success');
-      setMessage(SUCCESS_MESSAGE);
+      setMessage(BOT_SUCCESS_MESSAGE);
       setFile(null);
       router.refresh();
     } catch (err) {

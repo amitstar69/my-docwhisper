@@ -26,6 +26,7 @@ const templates = [
 type UploadPhase = 'idle' | 'validating' | 'uploading' | 'indexing' | 'success' | 'error';
 
 export default function NewBot() {
+  const SUCCESS_MESSAGE = 'Bot created successfully!';
   const supabase = useMemo(() => createClientComponentClient(), []);
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
@@ -102,10 +103,10 @@ export default function NewBot() {
       setPhase('indexing');
       setMessage('Indexing with Gemini File Search…');
 
-      const data = await response.json();
+      await response.json();
 
       setPhase('success');
-      setMessage(`Indexed document into store ${data.storeName ?? 'unknown'}!`);
+      setMessage(SUCCESS_MESSAGE);
       setFile(null);
       router.refresh();
     } catch (err) {

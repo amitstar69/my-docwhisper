@@ -1,4 +1,5 @@
 // Cache bust v2
+
 'use client';
 
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';

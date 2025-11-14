@@ -33,12 +33,20 @@ export default function NewBot() {
   const [template, setTemplate] = useState(templates[0].value);
   const [botName, setBotName] = useState('');
   const [phase, setPhase] = useState<UploadPhase>('idle');
-  const [message, setMessage] = useState<string>('');
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const resetFeedback = () => {
+    setError(null);
+    setSuccessMessage(null);
+    setStatusMessage(null);
+    setPhase('idle');
+  };
 
   const handleUpload = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError(null);
+    resetFeedback();
 
     if (!file) {
       setError('Select a document to upload.');
@@ -56,7 +64,8 @@ export default function NewBot() {
     }
 
     setPhase('validating');
-    setMessage('Validating session…');
+    setStatusMessage('Validating session…');
+    setSuccessMessage(null);
 
     const {
       data: { session },
@@ -70,7 +79,7 @@ export default function NewBot() {
     }
 
     setPhase('uploading');
-    setMessage('Uploading document to Supabase storage…');
+    setStatusMessage('Uploading document to Supabase storage…');
 
     const metadata = [
       { key: 'template', stringValue: template },
@@ -101,16 +110,34 @@ export default function NewBot() {
       }
 
       setPhase('indexing');
-      setMessage('Indexing with Gemini File Search…');
+      setStatusMessage('Indexing with Gemini File Search…');
 
-      await response.json();
+      const rawBody = await response.text();
+      let data: { success?: boolean; botId?: string | number; storeName?: string; status?: string } | null = null;
 
+      try {
+        data = rawBody ? JSON.parse(rawBody) : null;
+      } catch (parseError) {
+        throw new Error(rawBody || 'Upload completed but returned an unreadable response');
+      }
+
+      if (!data?.success) {
+        throw new Error('Upload finished but did not return success.');
+      }
+
+      setStatusMessage(null);
       setPhase('success');
-      setMessage(BOT_SUCCESS_MESSAGE);
+      setSuccessMessage(BOT_SUCCESS_MESSAGE);
       setFile(null);
-      router.refresh();
+      if (data.botId) {
+        router.push(`/dashboard/bots/${data.botId}`);
+      } else {
+        router.refresh();
+      }
     } catch (err) {
       console.error(err);
+      setStatusMessage(null);
+      setSuccessMessage(null);
       setPhase('error');
       setError(err instanceof Error ? err.message : 'Unexpected error while uploading');
     }
@@ -138,7 +165,10 @@ export default function NewBot() {
             id="bot-name"
             type="text"
             value={botName}
-            onChange={(event) => setBotName(event.target.value)}
+            onChange={(event) => {
+              resetFeedback();
+              setBotName(event.target.value);
+            }}
             placeholder="e.g. HR Buddy"
             className="w-full rounded-md border border-slate-200 px-3 py-2 text-base shadow-sm focus:border-blue-500 focus:outline-none"
             required
@@ -150,7 +180,10 @@ export default function NewBot() {
           <input
             type="file"
             accept=".pdf,.doc,.docx,.txt,.md"
-            onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+            onChange={(event) => {
+              resetFeedback();
+              setFile(event.target.files?.[0] ?? null);
+            }}
             className="w-full cursor-pointer rounded-md border border-dashed border-slate-300 bg-white px-3 py-6 text-sm text-slate-600 shadow-sm"
           />
           <p className="text-xs text-slate-500">PDF, Word, or text up to 25MB.</p>
@@ -172,7 +205,10 @@ export default function NewBot() {
                   value={item.value}
                   className="sr-only"
                   checked={template === item.value}
-                  onChange={(event) => setTemplate(event.target.value)}
+                  onChange={(event) => {
+                    resetFeedback();
+                    setTemplate(event.target.value);
+                  }}
                 />
                 <span className="font-semibold text-slate-900">{item.label}</span>
                 <span className="text-xs text-slate-500">{item.description}</span>
@@ -183,9 +219,14 @@ export default function NewBot() {
 
         <div className="space-y-2" aria-live="polite">
           {error && <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600">{error}</p>}
-          {message && !error && (
+          {statusMessage && !error && (
             <p className="rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-blue-600">
-              {message}
+              {statusMessage}
+            </p>
+          )}
+          {successMessage && !error && (
+            <p className="rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2 text-sm text-emerald-600">
+              {successMessage}
             </p>
           )}
         </div>
@@ -205,7 +246,8 @@ export default function NewBot() {
               setFile(null);
               setTemplate(templates[0].value);
               setBotName('');
-              setMessage('');
+              setStatusMessage(null);
+              setSuccessMessage(null);
               setError(null);
               setPhase('idle');
             }}

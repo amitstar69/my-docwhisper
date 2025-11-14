@@ -18,7 +18,7 @@ serve(async (req) => {
 
   const form = await req.formData();
   const file = form.get("file") as File;
-  const template = form.get("template") as string || "default";
+  const template = (form.get("template") as string) || "default";
   const metadata = JSON.parse(form.get("metadata") as string || "[]");
 
   // Save to storage
@@ -31,7 +31,7 @@ serve(async (req) => {
   });
 
   // Chunk config
-  const chunkConfig = template === "HR" ? {
+  const chunkConfig = template?.toLowerCase() === "hr" ? {
     whiteSpaceConfig: { maxTokensPerChunk: 300, maxOverlapTokens: 50 }
   } : undefined;
 
@@ -54,13 +54,30 @@ serve(async (req) => {
   }
 
   // Save to DB
-  await supabase.from("bots").insert({
-    user_id: user.id,
-    store_name: store.name,
-    display_name: file.name,
-    template,
-    metadata
-  });
+  const { data: botData, error: botError } = await supabase
+    .from("bots")
+    .insert({
+      user_id: user.id,
+      store_name: store.name,
+      display_name: file.name,
+      template,
+      metadata
+    })
+    .select("id")
+    .single();
 
-  return new Response(JSON.stringify({ storeName: store.name, status: "indexed" }));
+  if (botError || !botData) {
+    console.error("Failed to insert bot", botError);
+    return new Response("Failed to create bot", { status: 500 });
+  }
+
+  return new Response(
+    JSON.stringify({
+      success: true,
+      botId: botData.id,
+      storeName: store.name,
+      status: "indexed"
+    }),
+    { headers: { "Content-Type": "application/json" } }
+  );
 });
